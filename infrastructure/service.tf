@@ -12,4 +12,5 @@ provider "aws" {
 }
 module "kafka-service" {
   source = "../module"
+  cluster_name = var.cluster_name
 }
