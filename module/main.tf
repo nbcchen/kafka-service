@@ -40,7 +40,7 @@ data "aws_ecs_cluster" "cluster" {
 
 # broker ECR
 data "aws_ecr_repository" "kafka_broker_repository" {
-  name = var.kafka_broker_ecr_repository
+  name = "kafka-broker-ecr-repo-${var.env}"
 }
 
 data "aws_ecr_image" "kafka_broker_docker_image" {
@@ -50,7 +50,7 @@ data "aws_ecr_image" "kafka_broker_docker_image" {
 
 # producer ECR
 data "aws_ecr_repository" "kafka_producer_repository" {
-  name = var.kafka_producer_ecr_repository
+  name = "kafka-producer-ecr-repo-${var.env}"
 }
 
 data "aws_ecr_image" "kafka_producer_docker_image" {
@@ -60,7 +60,7 @@ data "aws_ecr_image" "kafka_producer_docker_image" {
 
 # consumer ECR
 data "aws_ecr_repository" "kafka_consumer_repository" {
-  name = var.kafka_consumer_ecr_repository
+  name = "kafka-consumer-ecr-repo-${var.env}"
 }
 
 data "aws_ecr_image" "kafka_consumer_docker_image" {

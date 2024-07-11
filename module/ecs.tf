@@ -13,7 +13,6 @@ resource "aws_ecs_task_definition" "kafka_broker_task" {
 
 resource "aws_ecs_service" "kafka_broker" {
   name            = "kafka-service-${var.env}"
-  depends_on      = [aws_iam_role_policy.ecs_policy]
   cluster         = data.aws_ecs_cluster.cluster.cluster_name
   desired_count   = "1"
   launch_type     = "FARGATE"
