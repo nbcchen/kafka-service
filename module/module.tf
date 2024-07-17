@@ -11,6 +11,10 @@ provider "aws" {
   }
 }
 
+locals {
+  launch_type = "EC2"
+}
+
 data "aws_iam_policy_document" "ecs_assume_role_policy" {
   statement {
     actions = ["sts:AssumeRole"]
@@ -19,7 +23,6 @@ data "aws_iam_policy_document" "ecs_assume_role_policy" {
       type        = "Service"
       identifiers = ["ecs-tasks.amazonaws.com"]
     }
-    resources = ["*"]
   }
 }
 
@@ -36,16 +39,6 @@ data "aws_iam_policy_document" "ecs_execution_inline_policy" {
 
 data "aws_ecs_cluster" "cluster" {
   cluster_name = var.cluster_name
-}
-
-# broker ECR
-data "aws_ecr_repository" "kafka_broker_repository" {
-  name = "kafka-broker-ecr-repo-${var.env}"
-}
-
-data "aws_ecr_image" "kafka_broker_docker_image" {
-  repository_name = data.aws_ecr_repository.kafka_broker_repository.name
-  most_recent     = true
 }
 
 # producer ECR
