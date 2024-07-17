@@ -73,7 +73,7 @@ resource "aws_ecs_task_definition" "kafka_zookeeper_task" {
           hostPort      = 2181
         }
       ]
-      image                    = "bitnami/kafka:2.8.0"
+      image                    = "bitnami/zookeeper:3.7.0"
       essential                = true
       readonly_root_filesystem = false
       environment = [
@@ -105,8 +105,8 @@ resource "aws_ecs_service" "kafka_zookeeper_service" {
 
 # resource "aws_ecs_task_definition" "kafka_consumer_task" {
 #   family                   = "kafka-consumer-family-${var.env}"
-#   memory                   = 8192
-#   cpu                      = 2048
+#   memory                   = 512
+#   cpu                      = 256
 #   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
 #   requires_compatibilities = [local.launch_type]
 #   network_mode             = "bridge"
