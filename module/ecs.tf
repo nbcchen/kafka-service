@@ -1,7 +1,7 @@
 resource "aws_ecs_task_definition" "kafka_broker_task" {
   family                   = "kafka-broker-family-${var.env}"
-  memory                   = 8192
-  cpu                      = 2048
+  memory                   = 512
+  cpu                      = 256
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
   requires_compatibilities = [local.launch_type]
   network_mode             = "bridge"
@@ -59,8 +59,8 @@ resource "aws_ecs_service" "kafka_broker_service" {
 
 resource "aws_ecs_task_definition" "kafka_zookeeper_task" {
   family                   = "kafka-zookeeper-family-${var.env}"
-  memory                   = 8192
-  cpu                      = 2048
+  memory                   = 512
+  cpu                      = 256
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
   requires_compatibilities = [local.launch_type]
   network_mode             = "bridge"
