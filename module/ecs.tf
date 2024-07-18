@@ -49,13 +49,13 @@ resource "aws_ecs_task_definition" "kafka_broker_task" {
   ])
 }
 
-resource "aws_ecs_service" "kafka_broker_service" {
-  name            = "kafka-broker-service-${var.env}"
-  cluster         = data.aws_ecs_cluster.cluster.cluster_name
-  desired_count   = "1"
-  launch_type     = local.launch_type
-  task_definition = aws_ecs_task_definition.kafka_broker_task.arn
-}
+# resource "aws_ecs_service" "kafka_broker_service" {
+#   name            = "kafka-broker-service-${var.env}"
+#   cluster         = data.aws_ecs_cluster.cluster.cluster_name
+#   desired_count   = "1"
+#   launch_type     = local.launch_type
+#   task_definition = aws_ecs_task_definition.kafka_broker_task.arn
+# }
 
 resource "aws_ecs_task_definition" "kafka_zookeeper_task" {
   family                   = "kafka-zookeeper-family-${var.env}"
@@ -101,6 +101,15 @@ resource "aws_ecs_service" "kafka_zookeeper_service" {
   desired_count   = "1"
   launch_type     = local.launch_type
   task_definition = aws_ecs_task_definition.kafka_zookeeper_task.arn
+  service_registries {
+    registry_arn = aws_service_discovery_service.kafka_zookeeper_service_discovery_entry.arn
+  }
+  network_configuration {
+    subnets = var.container_subnet_ids
+    security_groups = [ 
+      aws_security_group.kafka_zookeeper_sg.id
+     ]
+  }
 }
 
 resource "aws_ecs_task_definition" "kafka_consumer_task" {
@@ -111,7 +120,8 @@ resource "aws_ecs_task_definition" "kafka_consumer_task" {
   requires_compatibilities = [local.launch_type]
   network_mode             = "bridge"
   depends_on = [
-    aws_ecs_service.kafka_broker_service
+    # aws_ecs_service.kafka_broker_service,
+    aws_ecs_task_definition.kafka_broker_task
   ]
   container_definitions = jsonencode([
     {
@@ -165,7 +175,7 @@ resource "aws_ecs_task_definition" "kafka_producer_task" {
     }
   ])
   depends_on = [
-    aws_ecs_service.kafka_broker_service,
+    # aws_ecs_service.kafka_broker_service,
     aws_ecs_task_definition.kafka_consumer_task,
     # aws_ecs_service.kafka_consumer_service,
     aws_iam_role.ecs_execution_role
