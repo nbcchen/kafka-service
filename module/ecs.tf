@@ -5,7 +5,7 @@ resource "aws_ecs_task_definition" "kafka_broker_task" {
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
   requires_compatibilities = [local.launch_type]
   network_mode             = "awsvpc"
-  depends_on      = [aws_ecs_service.kafka_zookeeper_service]
+  depends_on               = [aws_ecs_service.kafka_zookeeper_service]
   container_definitions = jsonencode([
     {
       name = "kafka-broker-${var.env}"
@@ -25,7 +25,7 @@ resource "aws_ecs_task_definition" "kafka_broker_task" {
         },
         {
           name  = "KAFKA_ZOOKEEPER_CONNECT"
-          value = "1"
+          value = "zookeeper.kafka.local:2181"
         },
         {
           name  = "KAFKA_LISTENERS"
@@ -33,7 +33,24 @@ resource "aws_ecs_task_definition" "kafka_broker_task" {
         },
         {
           name  = "KAFKA_ADVERTISED_LISTENERS"
-          value = "PLAINTEXT://kafka:9092"
+          value = "PLAINTEXT://broker.kafka.local:9092"
+        },
+        {
+          name  = "ALLOW_PLAINTEXT_LISTENER"
+          value = "yes"
+        },
+        # https://github.com/bitnami/charts/issues/16188
+        {
+          name  = "KAFKA_CFG_LISTENERS"
+          value = "PLAINTEXT://:9092"
+        },
+        {
+          name  = "KAFKA_CFG_ADVERTISED_LISTENERS"
+          value = "PLAINTEXT://127.0.0.1:9092"
+        }, 
+        {
+          name  = "KAFKA_CFG_ZOOKEEPER_CONNECT"
+          value = "zookeeper.kafka.local:2181"
         }
       ]
       logConfiguration = {
@@ -49,13 +66,22 @@ resource "aws_ecs_task_definition" "kafka_broker_task" {
   ])
 }
 
-# resource "aws_ecs_service" "kafka_broker_service" {
-#   name            = "kafka-broker-service-${var.env}"
-#   cluster         = data.aws_ecs_cluster.cluster.cluster_name
-#   desired_count   = "1"
-#   launch_type     = local.launch_type
-#   task_definition = aws_ecs_task_definition.kafka_broker_task.arn
-# }
+resource "aws_ecs_service" "kafka_broker_service" {
+  name            = "kafka-broker-service-${var.env}"
+  cluster         = data.aws_ecs_cluster.cluster.cluster_name
+  desired_count   = "1"
+  launch_type     = local.launch_type
+  task_definition = aws_ecs_task_definition.kafka_broker_task.arn
+  network_configuration {
+    subnets = var.container_subnet_ids
+    security_groups = [
+      aws_security_group.kafka_broker_sg.id
+    ]
+  }
+  service_registries {
+    registry_arn = aws_service_discovery_service.kafka_broker_service_discovery_entry.arn
+  }
+}
 
 resource "aws_ecs_task_definition" "kafka_zookeeper_task" {
   family                   = "kafka-zookeeper-family-${var.env}"
@@ -106,9 +132,9 @@ resource "aws_ecs_service" "kafka_zookeeper_service" {
   }
   network_configuration {
     subnets = var.container_subnet_ids
-    security_groups = [ 
+    security_groups = [
       aws_security_group.kafka_zookeeper_sg.id
-     ]
+    ]
   }
 }
 
