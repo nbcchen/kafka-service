@@ -4,7 +4,7 @@ resource "aws_ecs_task_definition" "kafka_broker_task" {
   cpu                      = 256
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
   requires_compatibilities = [local.launch_type]
-  network_mode             = "bridge"
+  network_mode             = "awsvpc"
   depends_on      = [aws_ecs_service.kafka_zookeeper_service]
   container_definitions = jsonencode([
     {
@@ -63,7 +63,7 @@ resource "aws_ecs_task_definition" "kafka_zookeeper_task" {
   cpu                      = 256
   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
   requires_compatibilities = [local.launch_type]
-  network_mode             = "bridge"
+  network_mode             = "awsvpc"
   container_definitions = jsonencode([
     {
       name = "kafka-zookeeper-${var.env}"
@@ -112,35 +112,35 @@ resource "aws_ecs_service" "kafka_zookeeper_service" {
   }
 }
 
-resource "aws_ecs_task_definition" "kafka_consumer_task" {
-  family                   = "kafka-consumer-family-${var.env}"
-  memory                   = 512
-  cpu                      = 256
-  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
-  requires_compatibilities = [local.launch_type]
-  network_mode             = "bridge"
-  depends_on = [
-    # aws_ecs_service.kafka_broker_service,
-    aws_ecs_task_definition.kafka_broker_task
-  ]
-  container_definitions = jsonencode([
-    {
-      name                     = "kafka-consumer-${var.env}"
-      image                    = data.aws_ecr_image.kafka_consumer_docker_image.image_uri
-      essential                = true
-      readonly_root_filesystem = false
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          "awslogs-create-group"  = "true"
-          "awslogs-group"         = aws_cloudwatch_log_group.kafka_log_group.name
-          "awslogs-region"        = "us-east-1"
-          "awslogs-stream-prefix" = "kafka-consumer-"
-        }
-      }
-    }
-  ])
-}
+# resource "aws_ecs_task_definition" "kafka_consumer_task" {
+#   family                   = "kafka-consumer-family-${var.env}"
+#   memory                   = 512
+#   cpu                      = 256
+#   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
+#   requires_compatibilities = [local.launch_type]
+#   network_mode             = "awsvpc"
+#   depends_on = [
+#     # aws_ecs_service.kafka_broker_service,
+#     aws_ecs_task_definition.kafka_broker_task
+#   ]
+#   container_definitions = jsonencode([
+#     {
+#       name                     = "kafka-consumer-${var.env}"
+#       image                    = data.aws_ecr_image.kafka_consumer_docker_image.image_uri
+#       essential                = true
+#       readonly_root_filesystem = false
+#       logConfiguration = {
+#         logDriver = "awslogs"
+#         options = {
+#           "awslogs-create-group"  = "true"
+#           "awslogs-group"         = aws_cloudwatch_log_group.kafka_log_group.name
+#           "awslogs-region"        = "us-east-1"
+#           "awslogs-stream-prefix" = "kafka-consumer-"
+#         }
+#       }
+#     }
+#   ])
+# }
 
 # resource "aws_ecs_service" "kafka_consumer_service" {
 #   name            = "kafka-consumer-service-${var.env}"
@@ -150,37 +150,37 @@ resource "aws_ecs_task_definition" "kafka_consumer_task" {
 #   task_definition = aws_ecs_task_definition.kafka_consumer_task.arn
 # }
 
-resource "aws_ecs_task_definition" "kafka_producer_task" {
-  family                   = "kafka-producer-family-${var.env}"
-  memory                   = 512
-  cpu                      = 256
-  execution_role_arn       = aws_iam_role.ecs_execution_role.arn
-  requires_compatibilities = [local.launch_type]
-  network_mode             = "bridge"
-  container_definitions = jsonencode([
-    {
-      name                     = "kafka-producer-${var.env}"
-      image                    = data.aws_ecr_image.kafka_producer_docker_image.image_uri
-      essential                = true
-      readonly_root_filesystem = false
-      logConfiguration = {
-        logDriver = "awslogs"
-        options = {
-          "awslogs-create-group"  = "true"
-          "awslogs-group"         = aws_cloudwatch_log_group.kafka_log_group.name
-          "awslogs-region"        = "us-east-1"
-          "awslogs-stream-prefix" = "kafka-producer-"
-        }
-      }
-    }
-  ])
-  depends_on = [
-    # aws_ecs_service.kafka_broker_service,
-    aws_ecs_task_definition.kafka_consumer_task,
-    # aws_ecs_service.kafka_consumer_service,
-    aws_iam_role.ecs_execution_role
-  ]
-}
+# resource "aws_ecs_task_definition" "kafka_producer_task" {
+#   family                   = "kafka-producer-family-${var.env}"
+#   memory                   = 512
+#   cpu                      = 256
+#   execution_role_arn       = aws_iam_role.ecs_execution_role.arn
+#   requires_compatibilities = [local.launch_type]
+#   network_mode             = "awsvpc"
+#   container_definitions = jsonencode([
+#     {
+#       name                     = "kafka-producer-${var.env}"
+#       image                    = data.aws_ecr_image.kafka_producer_docker_image.image_uri
+#       essential                = true
+#       readonly_root_filesystem = false
+#       logConfiguration = {
+#         logDriver = "awslogs"
+#         options = {
+#           "awslogs-create-group"  = "true"
+#           "awslogs-group"         = aws_cloudwatch_log_group.kafka_log_group.name
+#           "awslogs-region"        = "us-east-1"
+#           "awslogs-stream-prefix" = "kafka-producer-"
+#         }
+#       }
+#     }
+#   ])
+#   depends_on = [
+#     # aws_ecs_service.kafka_broker_service,
+#     aws_ecs_task_definition.kafka_consumer_task,
+#     # aws_ecs_service.kafka_consumer_service,
+#     aws_iam_role.ecs_execution_role
+#   ]
+# }
 
 # resource "aws_ecs_service" "kafka_producer_service" {
 #   name            = "kafka-producer-service-${var.env}"

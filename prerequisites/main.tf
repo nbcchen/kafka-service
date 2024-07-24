@@ -4,8 +4,8 @@ provider "aws" {
     tags = {
       terraform         = "yes"
       environment       = var.env
-      costbucketproject = "kafka-poc"
-      costbucket        = "koco"
+      costbucketproject = "kafka"
+      costbucket        = "devops"
       application       = "oneapp"
     }
   }

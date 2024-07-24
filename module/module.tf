@@ -56,7 +56,7 @@ data "aws_ecr_repository" "kafka_consumer_repository" {
   name = "kafka-consumer-ecr-repo-${var.env}"
 }
 
-data "aws_ecr_image" "kafka_consumer_docker_image" {
-  repository_name = data.aws_ecr_repository.kafka_consumer_repository.name
-  most_recent     = true
-}
+# data "aws_ecr_image" "kafka_consumer_docker_image" {
+#   repository_name = data.aws_ecr_repository.kafka_consumer_repository.name
+#   most_recent     = true
+# }

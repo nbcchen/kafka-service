@@ -13,7 +13,7 @@ resource "aws_service_discovery_service" "kafka_zookeeper_service_discovery_entr
       ttl  = 10
     }
   }
-  health_check_config {
-    failure_threshold = 1
-  }
+  # health_check_config {
+  #   failure_threshold = 1
+  # }
 }

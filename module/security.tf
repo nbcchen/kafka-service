@@ -14,9 +14,9 @@ resource "aws_security_group" "kafka_zookeeper_sg" {
 
   egress {
     description = "Outbound for Kafka zookeeper"
-    from_port   = -1
-    to_port     = -1
-    protocol    = "-1"
+    from_port   = 0
+    to_port     = 10000
+    protocol    = "tcp"
     cidr_blocks = ["0.0.0.0/0"]
   }
 }
