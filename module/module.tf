@@ -12,26 +12,45 @@ provider "aws" {
 }
 
 locals {
-  launch_type = "EC2"
+  launch_type = "FARGATE"
 }
 
 data "aws_iam_policy_document" "ecs_assume_role_policy" {
+  version = "2012-10-17"
   statement {
     actions = ["sts:AssumeRole"]
     effect  = "Allow"
     principals {
-      type        = "Service"
-      identifiers = ["ecs-tasks.amazonaws.com"]
+      type = "Service"
+      identifiers = [
+        "ecs-tasks.amazonaws.com"
+      ]
     }
   }
 }
+
+# data "aws_iam_policy_document" "apprunner_assume_role_policy" {
+#   version = "2012-10-17"
+#   statement {
+#     principals {
+#       type        = "Service"
+#       identifiers = [
+#         "build.apprunner.amazonaws.com",
+#         "tasks.apprunner.amazonaws.com"
+#       ]
+#     }
+#     actions = ["sts:AssumeRole"]
+#     effect  = "Allow"
+#   }
+# }
 
 data "aws_iam_policy_document" "ecs_execution_inline_policy" {
   statement {
     effect = "Allow"
     actions = [
       "logs:CreateLogStream",
-      "logs:PutLogEvents"
+      "logs:PutLogEvents",
+      "servicediscovery:DiscoverInstances"
     ]
     resources = ["*"]
   }
@@ -63,4 +82,12 @@ data "aws_ecr_image" "kafka_consumer_docker_image" {
 
 data "aws_iam_policy" "AmazonECSTaskExecutionRolePolicy" {
   name = "AmazonECSTaskExecutionRolePolicy"
+}
+
+data "aws_iam_policy" "AWSAppRunnerServicePolicyForECRAccess" {
+  name = "AWSAppRunnerServicePolicyForECRAccess"
+}
+
+data "aws_iam_policy" "AmazonEC2ContainerRegistryReadOnly" {
+  name = "AmazonEC2ContainerRegistryReadOnly"
 }

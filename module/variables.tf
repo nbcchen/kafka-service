@@ -10,7 +10,7 @@ variable "cluster_name" {
 variable "vpc_id" {
   type = string
   validation {
-    condition = length(var.vpc_id) > 4 && substr(var.vpc_id, 0, 4) == "vpc-"
+    condition     = length(var.vpc_id) > 4 && substr(var.vpc_id, 0, 4) == "vpc-"
     error_message = "vpc_id is not valid"
   }
 }
